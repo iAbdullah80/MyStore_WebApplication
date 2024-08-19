@@ -1,15 +1,21 @@
 package com.example.shop.service;
 
 import com.example.shop.dto.itemDto;
+import com.example.shop.entity.Invoice;
+import com.example.shop.repository.InvoiceRepository;
+import com.example.shop.repository.UserRepo;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class orderService {
@@ -18,7 +24,34 @@ public class orderService {
 
     @Value("${STRIPE_SECRET_KEY}")
     private String apiKey;
-    public Session createSession(List<itemDto> itemDto) throws  StripeException {
+
+    @Autowired
+    private InvoiceRepository invoiceRepository;
+
+    @Autowired
+    private UserRepo userRepository;
+
+    public void saveInvoice(Long userId, String sessionId, int invoiceNumber) {
+        Invoice invoice = new Invoice();
+        invoice.setUser(userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found")));
+        invoice.setSessionId(sessionId);
+        invoice.setInvoiceNumber(invoiceNumber);
+        invoice.setPaid(false);
+        invoice.setCreatedAt(LocalDateTime.now());
+        invoiceRepository.save(invoice);
+    }
+    public void updateInvoiceAsPaid(String sessionId) {
+        Invoice invoice = invoiceRepository.findBySessionId(sessionId)
+                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+        invoice.setPaid(true);
+        invoiceRepository.save(invoice) ;
+    }
+    private int generateInvoiceNumber() {
+        // Implement a method to generate a unique invoice number
+        return new Random().nextInt(1000000) + 1;
+    }
+
+    public Session createSession(List<itemDto> itemDto, Long userId) throws  StripeException {
         // sucess and failure urls
 
         String successURL = baseURL + "payment/success.html";
@@ -39,8 +72,11 @@ public class orderService {
                 .setSuccessUrl(successURL)
                 .setCancelUrl(failureURL)
                 .addAllLineItem(sessionItemList)
+                .setClientReferenceId(userId.toString())
                 .build();
-        return Session.create(params);
+        Session session = Session.create(params);
+        saveInvoice(userId, session.getId(), generateInvoiceNumber());
+        return session;
     }
 
     private SessionCreateParams.LineItem createSessionLineItem(itemDto item) {
