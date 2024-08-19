@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/admin/api")
+@RequestMapping("/api/admin")
 public class adminController {
     private final productService productService;
 

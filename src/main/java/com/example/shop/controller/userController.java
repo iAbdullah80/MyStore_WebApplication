@@ -11,7 +11,7 @@ import com.example.shop.service.UserService;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/user")
 public class userController {
     private final UserService userService;
 
@@ -29,12 +29,4 @@ public class userController {
         userService.saveUser(user);
         return ResponseEntity.ok("User registered successfully");
     }
-
-    @GetMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserDto user){
-        return ResponseEntity.ok("User logged in successfully " + user.getEmail());
-
-    }
-
-
 }

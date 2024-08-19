@@ -16,14 +16,12 @@ import java.util.stream.Collectors;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping("user/api")
+@RequestMapping("api/user")
 public class LoginController {
-    private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
     private final UserRepo userRepo;
 
-    public LoginController(AuthenticationManager authenticationManager, TokenService tokenService, UserRepo userRepo) {
-        this.authenticationManager = authenticationManager;
+    public LoginController(TokenService tokenService, UserRepo userRepo) {
         this.tokenService = tokenService;
         this.userRepo = userRepo;
     }
