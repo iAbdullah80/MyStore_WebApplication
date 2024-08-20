@@ -1,6 +1,7 @@
 package com.example.shop.service;
 
 import com.example.shop.entity.product;
+import com.example.shop.repository.InvoiceRepository;
 import com.example.shop.repository.productRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,10 +12,12 @@ import java.util.List;
 public class productService {
 
     private final productRepository productRepository;
+    private final InvoiceRepository invoiceRepository;
 
     @Autowired
-    public productService(productRepository productRepository) {
+    public productService(productRepository productRepository, InvoiceRepository invoiceRepository) {
         this.productRepository = productRepository;
+        this.invoiceRepository = invoiceRepository;
     }
 
 
@@ -32,5 +35,9 @@ public class productService {
 
     public void deleteProductNumber(int number) {
         productRepository.deleteByNumber(number);
+    }
+
+    public void deleteAllInvoices() {
+        invoiceRepository.deleteAll();
     }
 }

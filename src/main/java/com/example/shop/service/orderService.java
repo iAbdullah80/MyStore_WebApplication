@@ -2,6 +2,8 @@ package com.example.shop.service;
 
 import com.example.shop.dto.itemDto;
 import com.example.shop.entity.Invoice;
+import com.example.shop.entity.InvoiceItem;
+import com.example.shop.entity.User;
 import com.example.shop.repository.InvoiceRepository;
 import com.example.shop.repository.UserRepo;
 import com.stripe.Stripe;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,10 +55,8 @@ public class orderService {
     }
 
     public Session createSession(List<itemDto> itemDto, Long userId) throws  StripeException {
-        // sucess and failure urls
-
+        // success and failure urls
         String successURL = baseURL + "payment/success.html";
-
         String failureURL = baseURL + "payment/failed.html";
 
         Stripe.apiKey = apiKey;
@@ -75,7 +76,8 @@ public class orderService {
                 .setClientReferenceId(userId.toString())
                 .build();
         Session session = Session.create(params);
-        saveInvoice(userId, session.getId(), generateInvoiceNumber());
+        //saveInvoice(userId, session.getId(), generateInvoiceNumber());
+        saveInvoice(userId, session.getId(), generateInvoiceNumber(), itemDto);
         return session;
     }
 
@@ -96,5 +98,34 @@ public class orderService {
                                 .setName(item.getName())
                                 .build()
                 ).build();
+    }
+
+    private void saveInvoice(Long userId, String sessionId, int invoiceNumber, List<itemDto> items) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Invoice invoice = new Invoice();
+        invoice.setUser(user);
+        invoice.setSessionId(sessionId);
+        invoice.setInvoiceNumber(invoiceNumber);
+        invoice.setPaid(false);
+        invoice.setCreatedAt(LocalDateTime.now());
+
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        for (itemDto item : items) {
+            InvoiceItem invoiceItem = new InvoiceItem();
+            invoiceItem.setInvoice(invoice);
+            invoiceItem.setProductName(item.getName());
+            invoiceItem.setPrice(BigDecimal.valueOf(item.getPrice()));
+            invoiceItem.setQuantity(item.getBasketCounter());
+            invoice.getItems().add(invoiceItem);
+
+            totalPrice = totalPrice.add(invoiceItem.getPrice().multiply(BigDecimal.valueOf(invoiceItem.getQuantity())));
+        }
+
+        invoice.setTotalPrice(totalPrice);
+
+        invoiceRepository.save(invoice);
+        System.out.println("Invoice saved successfully");
     }
 }

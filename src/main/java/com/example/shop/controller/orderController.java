@@ -32,8 +32,10 @@ public class orderController {
 
     @PostMapping("/create-checkout-session")
     public ResponseEntity<StripeResponse> createCheckoutSession(@RequestBody List<itemDto> itemDto,
-                                                                @RequestParam Long userId) throws StripeException {
-
+                                                                @RequestParam(required = false) Long userId) throws StripeException {
+        if (userId == null) {
+            userId = 5L;
+        }
         Session session = orderService.createSession(itemDto, userId);
         Invoice invoice = invoiceRepository.findBySessionId(session.getId())
                 .orElseThrow(() -> new RuntimeException("Invoice not found"));

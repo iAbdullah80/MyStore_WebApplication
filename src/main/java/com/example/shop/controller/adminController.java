@@ -16,6 +16,10 @@ public class adminController {
         this.productService = productService;
     }
 
+    @GetMapping("/products")
+    public Iterable<product> getProducts() {
+        return productService.getProducts();
+    }
 
     @PostMapping
     @RequestMapping("/add")
@@ -32,5 +36,10 @@ public class adminController {
     @RequestMapping("/delete/num/{number}")
     public void deleteProduct(@PathVariable("number") int number) {
         productService.deleteProductNumber(number);
+    }
+
+    @DeleteMapping("/invoices/delete/all")
+    public void deleteAllInvoices() {
+        productService.deleteAllInvoices();
     }
 }
