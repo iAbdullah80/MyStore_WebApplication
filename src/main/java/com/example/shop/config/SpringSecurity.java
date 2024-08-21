@@ -77,6 +77,7 @@ public class SpringSecurity {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/invoices/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
                                 .anyRequest().permitAll()
                 ).oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))

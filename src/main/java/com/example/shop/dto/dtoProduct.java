@@ -1,4 +1,4 @@
-package com.example.shop.entity;
+package com.example.shop.dto;
 
 public class dtoProduct {
     private Long id;
