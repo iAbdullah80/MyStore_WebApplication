@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  db:
+      image: mysql:8.0
+      environment:
+        MYSQL_DATABASE: ${DB_NAME}
+        MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      ports:
+        - "3306:3306"
+      volumes:
+        - db-data:/var/lib/mysql
+      networks:
+        - app-network
+        
+  app:
+    image: spring-server
+    environment:
+      - SPRING_DATASOURCE_URL=${DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - RSA_PRIVATE_KEY=classpath:certs/private.pem
+      - RSA_PUBLIC_KEY=classpath:certs/public.pem
+      - SECURITY_REQUIRE_SSL=true
+      - SERVER_SSL_KEY_STORE=classpath:certs/keystore.p12
+      - SERVER_SSL_KEY_STORE_PASSWORD=${KEYSTORE_PASSWORD}
+      - SERVER_SSL_KEYSTORE_TYPE=${KEYSTORE_TYPE}
+      - SERVER_SSL_KEY_ALIAS=tomcat
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - BASE_URL=${BASE_URL}
+      - SERVER_PORT=8443
+    ports:
+      - "8443:8443"
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:

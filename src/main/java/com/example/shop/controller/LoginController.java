@@ -16,16 +16,9 @@ import java.util.Map;
 public class LoginController {
     private final TokenService tokenService;
     private final UserRepo userRepo;
-
     public LoginController(TokenService tokenService, UserRepo userRepo) {
         this.tokenService = tokenService;
         this.userRepo = userRepo;
-    }
-
-    @GetMapping("/login")
-    public ResponseEntity<String> login(Authentication authentication) {
-        String token = tokenService.generateToken(authentication);
-        return ResponseEntity.ok(token);
     }
     @GetMapping("/data")
     public ResponseEntity<Map<String, Object>> data(Authentication authentication) {

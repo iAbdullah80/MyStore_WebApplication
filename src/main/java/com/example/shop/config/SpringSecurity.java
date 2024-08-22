@@ -77,9 +77,11 @@ public class SpringSecurity {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/api/invoices/**").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
-                                .anyRequest().permitAll()
+                                .requestMatchers("user/*").permitAll()
+                                .requestMatchers("/api/products/**").permitAll()
+                                .requestMatchers("api/webhook/**").permitAll()
+                                .requestMatchers("/api/orders/**").permitAll()
+                                .anyRequest().hasAnyRole("USER", "ADMIN")
                 ).oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

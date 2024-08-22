@@ -23,8 +23,11 @@ WORKDIR /app
 # Copy the JAR file from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
+# Copy the keystore file to the container
+COPY src/main/resources/certs/keystore.p12 /app/certs/keystore.p12
+
 # Expose the port the application runs on
-EXPOSE 5500
+EXPOSE 8443
 
 # Command to run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
